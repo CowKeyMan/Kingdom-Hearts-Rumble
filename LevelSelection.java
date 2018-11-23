@@ -161,6 +161,12 @@ public class LevelSelection implements ActionListener{
         if(lbl.size() == 0){
             page = 0;
             down.setVisible(false);
+        }else{
+            for(int i = 0; i < lbl.size() && i < max;i++){
+                lbl.get(i).setVisible(true);
+                select.get(i).setVisible(true);
+                delete.get(i).setVisible(true);
+            }
         }
         up.setVisible(false);
         if(page != maxPage){
@@ -169,17 +175,17 @@ public class LevelSelection implements ActionListener{
         back.setVisible(true);
         go.setVisible(true);
         txtPage.setVisible(true);
-        for(int i = 0; i < lbl.size() && i < max;i++){
-            lbl.get(i).setVisible(true);
-            select.get(i).setVisible(true);
-            delete.get(i).setVisible(true);
-        }
     }
     
     public void displayPage(){
-        int y = (page-1)*max;
+        int y;
+        if(page == 0){
+            y = max;
+        }else{
+            y = (page-1)*max;
+        }
         hideLabels();
-        for(int i = y; i < y+max && i < lbl.size(); i++){
+        for(int i = y; i < lbl.size() && i < y+max; i++){
             lbl.get(i).setVisible(true);
             select.get(i).setVisible(true);
             delete.get(i).setVisible(true);

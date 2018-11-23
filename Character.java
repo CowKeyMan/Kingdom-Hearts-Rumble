@@ -99,6 +99,10 @@ public class Character{
     boolean isAddingDamage = false;
     boolean isMovingBullet = false;
     
+    boolean canPerformAbility1 = false, canPerformAbility2 = false;
+    
+    Sound s = new Sound();
+    
     //Default Constructor
     //public Character(){}
     public Character(//Movement images
@@ -1219,7 +1223,7 @@ public class Character{
         //Start the animation timer for the other character
         if(dmg > 0){
             damagedTimer = Timer.time;
-            Sound.playSound(hitSounds, canPlaySound);
+            s.playSoundWithTimeRestriction(hitSounds, canPlaySound);
         }
         hp -= dmg;
         //Reduce the to hit time
@@ -1229,11 +1233,13 @@ public class Character{
     void startAbilityTimer1(){
         abilityTimer1 = Timer.time;
         ability1Stop = true;
+        canPerformAbility1 = true;
     }
     //Restart ability timer 2
     void startAbilityTimer2(){
         abilityTimer2 = Timer.time;
         ability2Stop = true;
+        canPerformAbility2 = true;
     }
     //Checks if chaacter is in the middle of ability 1
     boolean performingAbility1(){
@@ -1375,8 +1381,10 @@ public class Character{
     void move(ArrayList<Character> other){}
     void move(ArrayList<Character> other, int widthLimit, int heightLimit){}
     void moveProtagonist(){}
-    
-    
+    void checkForAbility1(){}
+    void checkForAbility2(){}
+    void checkForAbility1(ArrayList<Character> other){}
+    void checkForAbility2(ArrayList<Character> other){}
     
     
     

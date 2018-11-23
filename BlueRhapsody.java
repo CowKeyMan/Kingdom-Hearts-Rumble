@@ -12,6 +12,8 @@ public class BlueRhapsody extends Character{
     long icyBlastDuration;
     //The coordinates for the icy blast
     int ibx, iby;
+    //Coordinates of the bullet
+    int bulletX, bulletY;
     //Fired or not
     boolean ibFired = false;
     //The sprite for the icyBlast snowball
@@ -23,6 +25,10 @@ public class BlueRhapsody extends Character{
     long hittingFrequency;
     //The timer and duration for being ranged
     long rangedTimer, rangedDuration;
+    
+    boolean canAttackRanged = false;
+    boolean isAttackingRanged = false;
+    
     //Constructor
     public BlueRhapsody(//Movement images
                  Image pupMove, Image pdownMove, Image prightMove, Image pleftMove,
@@ -161,8 +167,9 @@ public class BlueRhapsody extends Character{
                 moveTowardsChar(other.get(getClosestChar(other)));
             }
             //Stop if shooting a ranged attack untiol animation ends
-            if(performingAbility1()){
+            if(performingAbility1() || (!attacking() && isAttackingRanged == true)){
                 stop(widthLimit, heightLimit);
+                isAttackingRanged = false;
             }
             //Move away from the closest character
             if(movingAwayFromChar == true){
@@ -205,7 +212,7 @@ public class BlueRhapsody extends Character{
     }
     
     void checkForAttack(ArrayList<Character> other){
-        if(attacking() && Timer.time - hittingTimer > hittingAnimation/2 && canAttack == true && ranged == false){
+        if(attacking() && Timer.time - hittingTimer > hittingAnimation/2 && ranged == false && canAttack == true){
             canAttack = false;
             
             //Damage character if hit
@@ -217,6 +224,9 @@ public class BlueRhapsody extends Character{
                     }
                 }
             }
+        }else if(Timer.time - hittingTimer > hittingAnimation - 150 && ranged == true && canAttackRanged == true){
+            shootBullet(bulletX, bulletY);
+            canAttackRanged = false;
         }
     }
     
@@ -254,14 +264,17 @@ public class BlueRhapsody extends Character{
     }
     void attack(int x, int y){
         //Attack when ranged
-        if(ranged == true && !performingAbility1() && !attacking() && !performingAbility2() && hp > 0){
-            shootBullet(x, y);
-            startAbilityTimer1();
+        if(ranged == true && !performingAbility1() && !attacking() && !performingAbility2() && hp > 0 && canAttackRanged == false){
+            bulletX = x; bulletY = y;
+            hittingTimer = Timer.time;
             if(midpointX() > x){
                 c.setImage(ability1Left);
             }else{
                 c.setImage(ability1Right);
             }
+            canAttackRanged = true;
+            isAttackingRanged = true;
+            stopAfterAttacking = true;
         }
     }
     //Be ranged for an amount of time
@@ -277,7 +290,6 @@ public class BlueRhapsody extends Character{
     void ability2(int x, int y){
         if(Timer.time - abilityTimer2 > abilityCooldown2 && !attacking() && !performingAbility1() && hp > 0){
             if(ibFired == false){
-                ibFired = true;
                 snowball.setPoints(midpointX() - snowball.getRadius(), midpointY() - snowball.getRadius());
                 
                 //The length between the points is calculated
@@ -312,8 +324,14 @@ public class BlueRhapsody extends Character{
                 }else{
                     c.setImage(ability2Right);
                 }
-                abilityTimer2 = Timer.time;
+                startAbilityTimer2();
             }
+        }
+    }
+    void checkForAbility2(ArrayList<Character> other){
+        if(performingAbility2() && Timer.time - abilityTimer2 > ability2AnimationTimer/2 && canPerformAbility2 == true){
+            ibFired = true;
+            canPerformAbility2 = false;
         }
     }
     //Move the snowball
@@ -349,7 +367,7 @@ public class BlueRhapsody extends Character{
     //The method to make the character move and what is to be controlled automatically
     void move(ArrayList<Character> other, int widthLimit, int heightLimit){
         if((hp>0 && !isEnemy) || isEnemy){
-            if(Timer.time - abilityTimer2 > ability2AnimationTimer){
+            if(!performingAbility2()){
                 if(!isProtagonist){
                     super.moveRandomly(other, widthLimit, heightLimit);
                     if(!ranged){
@@ -398,9 +416,14 @@ public class BlueRhapsody extends Character{
                 }
                 if(ranged && Timer.time - rangedDuration > rangedTimer){
                     ranged = false;
+                    isAttackingRanged = false;
                 }
                 moveSpecial(other, widthLimit, heightLimit);
-                super.move(widthLimit, heightLimit);
+                if(!isAttackingRanged || ranged == false){
+                    super.move(widthLimit, heightLimit);
+                }
+            }else{
+                checkForAbility2(other);
             }
             stopAnim(widthLimit,heightLimit);
         }else{

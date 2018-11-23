@@ -32,7 +32,6 @@ public class KHR extends Frame implements ActionListener, MouseListener, Runnabl
      * 16 = Credits
      */
     int state = 1;
-    
     boolean isRemovinglstHit = false, isRunning = false, isPainting = false, isPaused = false;
     
     //The time for how much the thread will delay before runnning the next frame
@@ -1911,7 +1910,7 @@ public class KHR extends Frame implements ActionListener, MouseListener, Runnabl
                         if(pause == true){
                             isPaused = true;
                             long delay = System.currentTimeMillis();
-                            while(System.currentTimeMillis() - delay < 1500){ repaint(); Timer.updateTimer()    ; }
+                            while(System.currentTimeMillis() - delay < 1500){ repaint(); Timer.updateTimer(); }
                             
                             pause = false;
                             isPaused = false;
@@ -2088,6 +2087,7 @@ public class KHR extends Frame implements ActionListener, MouseListener, Runnabl
 
     public void actionPerformed(ActionEvent e){
         boolean canPlayButtonSound = true;
+        boolean canPlayActualButtonSound = true;
             //Main Menu
         //If user presses 'main level'
         if(e.getSource() == m.mm.btn.get(0)){
@@ -2365,6 +2365,9 @@ public class KHR extends Frame implements ActionListener, MouseListener, Runnabl
         
             //RoundFinish items
         else if(e.getSource() == rf.exit || e.getSource() == kos.exit || e.getSource() == ps.exit){
+            slow.setVisible(false);
+            moderate.setVisible(false);
+            fast.setVisible(false);
             background = backgroundsArray[(int)(Math.random() * backgroundsArray.length)];
             if(state == 13){
                 Timer.continueTimer();
@@ -2523,6 +2526,7 @@ public class KHR extends Frame implements ActionListener, MouseListener, Runnabl
             //Character Selection buttons
         for(int x = 0; x < cs.select.size(); x++){
             if(e.getSource() == cs.select.get(x)){
+                canPlayActualButtonSound = false;
                 if(CharacterSelection.canPlaySound){
                     Sound.stopSound();
                     Sound.playSound(Character.chooseSound.get(x), canPlaySFX);
@@ -2928,9 +2932,10 @@ public class KHR extends Frame implements ActionListener, MouseListener, Runnabl
         if(!LevelCreator.playSound || CharacterSelection.canPlaySound == false || LevelSelection.canPlaySound == false || UserSelection.canPlaySound == false){
             canPlayButtonSound = false;
         }
-        
         if(canPlayButtonSound){
-            Sound.playSound(buttonClickName, canPlaySFX);
+            if(canPlayActualButtonSound){
+                Sound.playSound(buttonClickName, canPlaySFX);
+            }
         }else{
             Sound.playSound(errorButtonClickName, canPlaySFX);
             LevelCreator.playSound = true;

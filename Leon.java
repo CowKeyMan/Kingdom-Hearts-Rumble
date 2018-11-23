@@ -145,14 +145,19 @@ public class Leon extends Character{
             }else{
                 c.setImage(ability1Right);
             }
+        }
+    }
+    void checkForAbility1(ArrayList<Character> other){
+        if(performingAbility1() && Timer.time - abilityTimer1 > ability1AnimationTimer/2 && canPerformAbility1 == true){
             for(int i = 0; i<other.size();i++){
                 if(!isEnemy && other.get(i).isEnemy || isEnemy && other.get(i).isEnemy == false){
                     //If he hits the other character, damage him
-                    if(other.get(i).c.hasCollidedWith(x,y)){
+                    if(other.get(i).c.hasCollidedWith(dx,dy)){
                         damageChar(i, damage*3, other);
                     }
                 }
             }
+            canPerformAbility1 = false;
         }
     }
     //Overload ability 2 to use it as an AI too(input character)
@@ -164,12 +169,10 @@ public class Leon extends Character{
             
             for(int i = 0; i<other.size();i++){
                 if(other.get(i).c.hasCollidedWith(x,y) && (!isEnemy && other.get(i).isEnemy || isEnemy && other.get(i).isEnemy == false) && other.get(i).hp != 0 && cont == true){
-                    shootBullet(x, y);
-                    
                     cont = false;
                     
                     //Restart timer and set the image
-                    abilityTimer2 = Timer.time;
+                    startAbilityTimer2();
                     if(x < c.getMidpointX()){
                         c.setImage(ability2Left);
                     }else{
@@ -178,6 +181,12 @@ public class Leon extends Character{
                     charNo = i;
                 }
             }
+        }
+    }
+    void checkForAbility2(ArrayList<Character> other){
+        if(performingAbility2() && Timer.time - abilityTimer2 > ability2AnimationTimer/2 && canPerformAbility2 == true){
+            shootBullet(other.get(charNo).midpointX(), other.get(charNo).midpointY());
+            canPerformAbility2 = false;
         }
     }
     //Make the bullet follow the other character for an amount of time
@@ -214,7 +223,7 @@ public class Leon extends Character{
     //The method to make the character move and what is to be controlled automatically
     void move(ArrayList<Character> other, int widthLimit, int heightLimit){
         if((hp>0 && !isEnemy) || isEnemy){
-            if(Timer.time - abilityTimer1 > ability1AnimationTimer && Timer.time - abilityTimer2 > ability2AnimationTimer){
+            if(!performingAbility1() && !performingAbility2()){
                 if(!isProtagonist){
                     super.moveRandomly(other, widthLimit, heightLimit);
                     //Time the timer to hit attack, reset when no longer hitting
@@ -256,6 +265,9 @@ public class Leon extends Character{
                 
                 super.move(widthLimit, heightLimit);
                 stopAnim(widthLimit, heightLimit);
+            }else{
+                checkForAbility1(other);
+                checkForAbility2(other);
             }
         }else{
             stop(widthLimit, heightLimit);
@@ -282,7 +294,7 @@ public class Leon extends Character{
     //3. animation for sure hit
     public void paint(Graphics g, ArrayList<Character> other){
         super.paint(g);
-        if(Timer.time - abilityTimer1 < ability1AnimationTimer){
+        if(Timer.time - abilityTimer1 - ability1AnimationTimer/2 < ability1AnimationTimer && Timer.time - abilityTimer1 - ability1AnimationTimer/2 > 0){
             g.drawImage(dirShot, dx, dy, null);
         }
         

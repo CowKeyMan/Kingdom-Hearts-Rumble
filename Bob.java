@@ -7,6 +7,8 @@ public class Bob extends Character{
     //Booean to see wether directions are to be changed
     boolean toChange = false;
     
+    int bulletX, bulletY;
+    
     public Bob(//Movement images
          Image pupMove, Image pdownMove, Image prightMove, Image pleftMove,
          Image pupLeftMove, Image pupRightMove, Image pdownLeftMove, Image pdownRightMove,
@@ -120,9 +122,8 @@ public class Bob extends Character{
     
     void ability2(int x, int y){
         if(Timer.time - abilityTimer2 > abilityCooldown2 && hp > 0 && !attacking() && !performingAbility1() && !performingAbility2() && bullet.size() == 0){
-            shootBullet(x, y);
-            //Restart the travel timer
-            travelTimer = Timer.time;
+            bulletX = x; bulletY = y;
+            
             //Restart timer
             startAbilityTimer2();
             
@@ -133,6 +134,14 @@ public class Bob extends Character{
                 c.setImage(ability2Right);
             }
             toChange = true;
+        }
+    }
+    void checkForAbility2(){
+        if(performingAbility2() && Timer.time - abilityTimer2 > ability2AnimationTimer/2 && canPerformAbility2 == true){
+            shootBullet(bulletX, bulletY);
+            //Restart the travel timer
+            travelTimer = Timer.time;
+            canPerformAbility2 = false;
         }
     }
     
@@ -208,6 +217,8 @@ public class Bob extends Character{
                 }
                 moveSpecial(other, widthLimit, heightLimit);
                 super.move(widthLimit, heightLimit);
+            }else{
+                checkForAbility2();
             }
             stopAnim(widthLimit, heightLimit);
         }else{

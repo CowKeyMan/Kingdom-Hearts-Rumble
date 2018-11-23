@@ -236,7 +236,12 @@ public class UserSelection implements ActionListener{
     }
     
     public void displayPage(){
-        int y = (page-1)*max;
+        int y;
+        if(page == 0){
+            y = max;
+        }else{
+            y = (page-1)*max;
+        }
         hideLabels();
         for(int i = y; i < y+max && i < lbl.size(); i++){
             lbl.get(i).setVisible(true);

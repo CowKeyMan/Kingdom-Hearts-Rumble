@@ -9,6 +9,8 @@ public class Sora extends Character{
     //duration for the wind
     long windDuration;
     boolean hit2 = false;
+    
+    int bulletDirectionX, bulletDirectionY;
     //Contructor
     public Sora(//Movement images
                  Image pupMove, Image pdownMove, Image prightMove, Image pleftMove,
@@ -285,8 +287,6 @@ public class Sora extends Character{
     void ability1(int x, int y, int widthLimit, int heightLimit){
         //If the cooldown is back and keyblade is not still rebounding
         if(Timer.time - abilityTimer1 > abilityCooldown1 && !attacking()  && !performingAbility1() && !performingAbility2() && hp > 0){
-            //Shoot the keyblade/bullet
-            shootBullet(x, y);
             //Start the cooldown
             startAbilityTimer1();
             //Set the character image
@@ -296,6 +296,14 @@ public class Sora extends Character{
             }else{
                 c.setImage(ability1Right);
             }
+            bulletDirectionX = x; bulletDirectionY = y;
+        }
+    }
+    void checkForAbility1(){
+        if(performingAbility1() && Timer.time - abilityTimer1 > ability1AnimationTimer/2 && canPerformAbility1 == true){
+            //Shoot the keyblade/bullet
+            shootBullet(bulletDirectionX, bulletDirectionY);
+            canPerformAbility1 = false;
         }
     }
     //Move Keyblade after throwing it
@@ -331,7 +339,7 @@ public class Sora extends Character{
     void wind(ArrayList<Character> other, int widthLimit, int heightLimit){
         wind.setX(midpointX() - wind.getWidth()/2);
         wind.setY(boundsMiddle.y + boundsMiddle.height - wind.getHeight());
-        if(Timer.time - abilityTimer2 < windDuration){
+        if(Timer.time - abilityTimer2 < windDuration && Timer.time - abilityTimer2 > ability2AnimationTimer){
             for(int i = 0;i<other.size();i++){
                 if(wind.hasCollidedWith(other.get(i).boundsMiddle) && (!isEnemy && other.get(i).isEnemy || isEnemy && other.get(i).isEnemy == false)){
                     //Get midpoints of wind and character
@@ -396,6 +404,9 @@ public class Sora extends Character{
                 }
                 moveSpecial(other, widthLimit, heightLimit);
                 super.move(widthLimit, heightLimit);
+            }else{
+                checkForAbility1();
+                checkForAbility2();
             }
             if(Timer.time - hittingTimer > hittingAnimation + 500){
                 attackNo = 0;
@@ -419,7 +430,7 @@ public class Sora extends Character{
         for(int i = 0; i<bullet.size(); i++){
             bullet.get(i).paint(g);
         }
-        if(Timer.time - abilityTimer2 < windDuration){
+        if(Timer.time - abilityTimer2 < windDuration && Timer.time - abilityTimer2 > ability2AnimationTimer){
             wind.paint(g);
         }
     }

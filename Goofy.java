@@ -142,8 +142,7 @@ public class Goofy extends Character{
             tpy = (y + c.getMidpointY())/2;
             //Restart timer
             startAbilityTimer2();
-            shieldThrown = true;
-            shootBullet(x,y);
+            
             stop(widthLimit, heightLimit);
             
             //Determining the duration that the shield must rotate before it makes a full circle
@@ -160,6 +159,13 @@ public class Goofy extends Character{
             }else{
                 c.setImage(ability2Left);
             }
+        }
+    }
+    void checkForAbility2(){
+        if(performingAbility2() && Timer.time - abilityTimer2 > ability2AnimationTimer/2 && canPerformAbility2 == true){
+            shieldThrown = true;
+            shootBullet(tpx,tpy);
+            canPerformAbility2 = false;
         }
     }
     //Move the shield
@@ -233,7 +239,7 @@ public class Goofy extends Character{
     //The method to make the character move and what is to be controlled automatically
     void move(ArrayList<Character> other, int widthLimit, int heightLimit){
         if((hp>0 && !isEnemy) || isEnemy){
-            if(Timer.time - abilityTimer2 > ability2AnimationTimer){
+            if(!performingAbility2()){
                 if(!isProtagonist){
                     super.moveRandomly(other, widthLimit, heightLimit);
                     //Time the timer to hit attack, reset when no longer hitting
@@ -276,9 +282,11 @@ public class Goofy extends Character{
                     speedUp = false;
                     setSpeed(getBaseSpeed());
                 }
+                //move items
+                super.move(widthLimit, heightLimit);
+            }else{
+                checkForAbility2();
             }
-            //move items
-            super.move(widthLimit, heightLimit);
             //Stop ability animations
             stopAnim(widthLimit, heightLimit);
             if(Timer.time - abilityTimer1 < ability1AnimationTimer){

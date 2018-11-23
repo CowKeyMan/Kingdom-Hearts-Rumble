@@ -132,11 +132,7 @@ public class Donald extends Character{
             for(int i = 0; i < other.size() && cont == true; i++){
                 if(other.get(i).c.hasCollidedWith(rec)){
                     if(!(!isEnemy && other.get(i).isEnemy || isEnemy && other.get(i).isEnemy == false) && other.get(i).hp < other.get(i).maxHP){
-                        //Set for animation
-                        healTimer = Timer.time;
                         hChar = i;
-                        //negative damage
-                        damageChar(i, -(int)(damage*healToDamage + other.get(i).maxHP *0.2), other);
                         startAbilityTimer1();
                         stop(widthLimit, heightLimit);
                         //Set the character image
@@ -151,6 +147,15 @@ public class Donald extends Character{
             }
         }
     }
+    void checkForAbility1(ArrayList<Character> other){
+        if(performingAbility1() && Timer.time - abilityTimer1 > ability1AnimationTimer/2 && canPerformAbility1 == true){
+            //Set for animation
+            healTimer = Timer.time;
+            //negative damage
+            damageChar(hChar, -(int)(damage*healToDamage + other.get(hChar).maxHP *0.2), other);
+            canPerformAbility1 = false;
+        }
+    }
     //Thunder(damage enemies around a circular area)
     void ability2(ArrayList<Character> other, int x, int y, int widthLimit, int heightLimit){
         //Check Timer
@@ -159,8 +164,19 @@ public class Donald extends Character{
             //Set thunder positions
             tx = x;
             ty = y;
-            //Make a new Sprite to detect collision
             
+            //Set the image
+            if(x < c.getMidpointX()){
+                c.setImage(ability2Left);
+            }else{
+                c.setImage(ability2Right);
+            }
+            //Restart timer
+            startAbilityTimer2();
+        }
+    }
+    void checkForAbility2(ArrayList<Character> other){
+        if(performingAbility2() && Timer.time - abilityTimer2 > ability2AnimationTimer/2 && canPerformAbility2 == true){
             Sprite thunder = new Sprite(thunderImage, tx - thunderWidth/2, ty - thunderLength/2, thunderWidth, thunderLength);
             
             //Damage if it collides with an enemy
@@ -171,14 +187,7 @@ public class Donald extends Character{
                     }
                 }
             }
-            //Set the image
-            if(x < c.getMidpointX()){
-                c.setImage(ability2Left);
-            }else{
-                c.setImage(ability2Right);
-            }
-            //Restart timer
-            startAbilityTimer2();
+            canPerformAbility2 = false;
         }
     }
     //The method to make the character move and what is to be controlled automatically
@@ -219,6 +228,9 @@ public class Donald extends Character{
                 }
                 moveSpecial(other, widthLimit, heightLimit);
                 super.move(widthLimit, heightLimit);
+            }else{
+                checkForAbility1(other);
+                checkForAbility2(other);
             }
             stopAnim(widthLimit, heightLimit);
         }else{
@@ -232,7 +244,7 @@ public class Donald extends Character{
     }
     public void paint(Graphics g, ArrayList<Character> other){
         super.paint(g);
-        if(Timer.time - abilityTimer2 < thunderDuration){
+        if(Timer.time - abilityTimer2 - ability2AnimationTimer/2 < thunderDuration && Timer.time - abilityTimer2 - ability2AnimationTimer/2 > 0){
             g.drawImage(thunderImage, tx - thunderWidth/2, ty - thunderHeight + thunderLength/2, null);
         }
         if(Timer.time - healTimer < healDuration){
